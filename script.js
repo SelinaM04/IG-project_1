@@ -5,6 +5,15 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 
+// Ensure the map resizes correctly when the window is resized
+window.addEventListener('load', function() {
+    map.invalidateSize();
+});
+
+window.addEventListener('resize', function() {
+    map.invalidateSize();
+});
+
 fetch('img/DOHMH_New_York_City_Restaurant_Inspection_Results_20240925.geojson')
     .then(response => response.json())
     .then(data => {
