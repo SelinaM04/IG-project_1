@@ -1,38 +1,91 @@
-// Initialize the map and set the view to Manhattan, NYC
-var map = L.map('map').setView([40.7831, -73.9712], 12);  // Centered on Manhattan
+var map = L.map('map').setView([40.7128, -74.0060], 13); // Centered on NYC
 
-// Add OpenStreetMap tiles as the base layer
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
-
-let allRestaurants;  // Store all restaurant data
-let restaurantLayer;  // Store and manage restaurant markers layer
-
-// Custom icon for the restaurant pins
-var customIcon = L.icon({
-    iconUrl: 'img/1.png',  // Path to your custom pin image
-    iconSize: [25, 41],  // Size of the icon
-    iconAnchor: [12, 41],  // Point of the icon corresponding to the marker's location
-    shadowUrl: null,
-    shadowSize: null,
-    shadowAnchor: null
+var streetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+});
+var satelliteMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles © Esri, Sources: Esri, DeLorme, NAVTEQ, USGS, and others'
 });
 
-// Function to display restaurants on the map
-function displayRestaurants(data) {
-    // Clear any existing layer from the map
-    if (restaurantLayer) {
-        map.removeLayer(restaurantLayer);
+streetMap.addTo(map);
+
+let restaurantLayer; // Layer for filtered restaurants
+let allRestaurantsLayer; // Layer for all restaurants
+
+var baseMaps = {
+    "Street Map": streetMap,
+    "Satellite Map": satelliteMap
+};
+
+var overlayMaps = {}; 
+
+var controlLayers = L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+function displayAllRestaurants(data) {
+    if (allRestaurantsLayer) {
+        map.removeLayer(allRestaurantsLayer);  
     }
 
-    // Add new markers for the filtered data
+    var customIcon = L.icon({
+        iconUrl: 'img/1.png',  
+        iconSize: [25, 41],  
+        iconAnchor: [12, 41]  
+    });
+
+    allRestaurantsLayer = L.geoJSON(data, {
+        pointToLayer: function (feature, latlng) {
+            return L.marker(latlng, { icon: customIcon });
+        },
+        onEachFeature: function (feature, layer) {
+            layer.on('click', function() {
+                document.getElementById('restaurantInfo').innerHTML = `
+                    <b>Name:</b> ${feature.properties.restaurant_name}<br>
+                    <b>Address:</b> ${feature.properties.address}<br>
+                    <b>Cuisine:</b> ${feature.properties.cuisine_type}<br>
+                    <b>Zip Code:</b> ${feature.properties.zipcode}<br>
+                    <b>Grade:</b> ${feature.properties.grade}<br>
+                    <b>Violation:</b> ${feature.properties.violation_description}
+                `;
+            });
+        }
+    }).addTo(map);
+
+    controlLayers.addOverlay(allRestaurantsLayer, 'Show All Restaurants');
+
+    // Define filter function inside displayAllRestaurants
+    function filterRestaurants(zipcode, cuisine) {
+        if (!allRestaurants) return;
+
+        const filteredData = allRestaurants.features.filter(feature => {
+            const restaurantZipcode = feature.properties.zipcode ? feature.properties.zipcode.trim() : '';
+            const restaurantCuisine = feature.properties.cuisine_type ? feature.properties.cuisine_type.trim().toLowerCase() : '';
+
+            const matchesZipcode = zipcode === '' || restaurantZipcode.includes(zipcode);
+            const matchesCuisine = cuisine === '' || restaurantCuisine.includes(cuisine);
+
+            return matchesZipcode && matchesCuisine;
+        });
+
+        if (filteredData.length === 0) {
+            document.getElementById('errorMessage').textContent = "No restaurants found for the given search criteria.";
+        } else {
+            document.getElementById('errorMessage').textContent = "";  
+            displayRestaurants({ type: 'FeatureCollection', features: filteredData });
+        }
+    }
+
+}
+
+function displayRestaurants(data) {
+    if (restaurantLayer) {
+        map.removeLayer(restaurantLayer);  
+    }
+
     restaurantLayer = L.geoJSON(data, {
         pointToLayer: function (feature, latlng) {
             return L.marker(latlng, { icon: customIcon });
         },
         onEachFeature: function (feature, layer) {
-            // Bind a popup to display restaurant information when a pin is clicked
             layer.on('click', function() {
                 document.getElementById('restaurantInfo').innerHTML = `
                     <b>Name:</b> ${feature.properties.restaurant_name}<br>
@@ -40,57 +93,27 @@ function displayRestaurants(data) {
                     <b>Cuisine:</b> ${feature.properties.cuisine_type}<br>
                     <b>Zip Code:</b> ${feature.properties.zipcode}<br>
                     <b>Grade:</b> ${feature.properties.grade}
+                    <b>Violation:</b> ${feature.properties.violation_description}
                 `;
             });
         }
     }).addTo(map);
+
+    controlLayers.addOverlay(restaurantLayer, 'Filtered Restaurants');
 }
 
-function filterRestaurants(zipcode, cuisine) {
-    if (!allRestaurants) return;  // Ensure data is loaded before filtering
-
-    // Normalize and filter restaurants by zip code and/or cuisine type
-    const filteredData = allRestaurants.features.filter(feature => {
-        // Check if the feature has zipcode and cuisine_type properties, and handle undefined cases
-        const restaurantZipcode = feature.properties.zipcode ? feature.properties.zipcode.trim() : '';
-        const restaurantCuisine = feature.properties.cuisine_type ? feature.properties.cuisine_type.trim().toLowerCase() : '';
-
-        const matchesZipcode = zipcode === '' || restaurantZipcode === zipcode;
-        const matchesCuisine = cuisine === '' || restaurantCuisine.includes(cuisine);
-
-        return matchesZipcode && matchesCuisine;
-    });
-
-    console.log("Filtered Data:", filteredData);  // Debug filtered data
-
-    // Display a message if no restaurants match the criteria
-    if (filteredData.length === 0) {
-        alert("No restaurants found for the given search criteria.");
-    } else {
-        // Wrap filtered data in GeoJSON format and display it on the map
-        displayRestaurants({ type: 'FeatureCollection', features: filteredData });
-    }
-}
-
-
-// Load GeoJSON data for restaurant inspections
-fetch('data/DOHMH New York City Restaurant Inspection Results_20240929 (1).geojson')  // Ensure this path is correct
+fetch('data/DOHMH New York City Restaurant Inspection Results_20240929 (1).geojson')  
     .then(response => response.json())
     .then(data => {
-        allRestaurants = data;  // Store the complete dataset
-        // Display all restaurants by default when the map loads
-        displayRestaurants(allRestaurants);
+        allRestaurants = data;  
+        displayAllRestaurants(allRestaurants);  
     })
     .catch(error => console.error('Error loading the GeoJSON file:', error));
 
-// Search functionality for filtering by zip code and cuisine type
-// Search functionality for filtering by zip code and cuisine type
-document.getElementById('searchBtn').addEventListener('click', function() {
-    console.log("allRestaurants:", allRestaurants);  // Check if data is loaded
-    const zipcode = document.getElementById('zipcodeSearch').value.trim();  // Get the zip code input
-    const cuisine = document.getElementById('cuisineSearch').value.trim().toLowerCase();  // Get the cuisine type input
 
-    // Call the filtering function with the input values
+document.getElementById('searchBtn').addEventListener('click', function() {
+    const zipcode = document.getElementById('zipcodeSearch').value.trim();
+    const cuisine = document.getElementById('cuisineSearch').value.trim().toLowerCase();
+
     filterRestaurants(zipcode, cuisine);
 });
-

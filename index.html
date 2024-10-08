@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="reset.css" />
 </head>
 <body>
+
     <h1> NYC Restaurant Insights</h1>
     <h2>"NYC Restaurant Insights" is your premier destination for navigating New York City's culinary scene with confidence. 
          With our intuitive search function, users can effortlessly locate restaurants in their vicinity 
@@ -15,19 +16,20 @@
          Committed to professionalism and transparency, we empower diners to make informed
           decisions, enhancing their dining experiences across the city's diverse culinary landscape.
         </h2>
-    <nav>
-        <input type="text" id="zipcodeSearch" placeholder="Search by Zip Code">
-        <input type="text" id="cuisineSearch" placeholder="Search by Cuisine Type">
-        <button id="searchBtn">Search</button>
-    </nav>
+        <header>
+            <nav>
+                <input type="text" id="zipcodeSearch" placeholder="Search by Zip Code">
+                <input type="text" id="cuisineSearch" placeholder="Search by Cuisine Type">
+                <button class="btn" onclick="filterRestaurants()">Search</button> 
+            </nav>
+        </header>
     
     <div id="mapContainer">
-        <div id="infoPanel">
-            <h2>Restaurant Info:</h2>
-            <div id="restaurantInfo"></div>
-        </div>
-        <div id="map" style="width: 80%; height: 500px;"></div>
+        
+        <div id="map" style="width: 100%; height: 620px;"></div>
     </div>
+
+    <div id="errorMessage"></div>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="script.js"></script>

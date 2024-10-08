@@ -5,7 +5,7 @@
 html, body {
     margin: 0;
     padding: 0;
-    background-color: hwb(48 89% 9%);
+    background-color: #e8e7e3;
 }
 
 h1 {
@@ -46,19 +46,17 @@ nav button {
 }
 
 #map {
-    width: 80%;
-    height: 500px;
-}
-
-#infoPanel {
-    width: 25%;
-    padding: 10px;
-    border-right: 2px solid #ccc; /* Change border to the right since it's now on the left */
+    width: 100%;
+    height: calc(100vh - 200px);  /* Responsive height */
+    background-color: #f0f0f0;     /* Light background for map area */
 }
 
 
-
-#restaurantInfo {
-    font-size: 1em;
-    color: #333;
+#errorMessage {
+    color: red;
+    text-align: center;
+    margin-top: 10px;
 }
+
+
+
