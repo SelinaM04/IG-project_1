@@ -5,33 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NYC Restaurant Inspection Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="reset.css" />
 </head>
 <body>
 
-    <h1> NYC Restaurant Insights</h1>
+    <h1>NYC Restaurant Insights</h1>
     <h2>"NYC Restaurant Insights" is your premier destination for navigating New York City's culinary scene with confidence. 
-         With our intuitive search function, users can effortlessly locate restaurants in their vicinity 
-         by zip code, accessing detailed information on inspection grades and violations. 
-         Committed to professionalism and transparency, we empower diners to make informed
-          decisions, enhancing their dining experiences across the city's diverse culinary landscape.
-        </h2>
-        <header>
-            <nav>
-                <input type="text" id="zipcodeSearch" placeholder="Search by Zip Code">
-                <input type="text" id="cuisineSearch" placeholder="Search by Cuisine Type">
-                <button class="btn" onclick="filterRestaurants()">Search</button> 
-            </nav>
-        </header>
+        With our intuitive search function, users can effortlessly locate restaurants in their vicinity 
+        by zip code, accessing detailed information on inspection grades and violations. 
+        Committed to professionalism and transparency, we empower diners to make informed
+        decisions, enhancing their dining experiences across the city's diverse culinary landscape.
+    </h2>
+     <div id="restaurantInfo" style="padding: 10px; background-color: #f4f4f4; margin-top: 20px; border: 1px solid #ccc;">
+        <h3>Click on a restaurant to see details here</h3>
+    </div>
+
+    <header>
+        <nav>
+            <input type="text" id="zipcodeSearch" placeholder="Search by Zip Code">
+            <input type="text" id="cuisineSearch" placeholder="Search by Cuisine Type">
+            <input type="text" id="numRest" placeholder="Select the number of restaurants">
+
+            <button class="btn" onclick="filterRestaurants()">Search</button> 
+        </nav>
+    </header>
     
     <div id="mapContainer">
-        
         <div id="map" style="width: 100%; height: 620px;"></div>
     </div>
 
+    <!-- Error message -->
     <div id="errorMessage"></div>
 
+    <!-- Div to display restaurant information -->
+   
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     <script src="script.js"></script>
+
 </body>
 </html>
