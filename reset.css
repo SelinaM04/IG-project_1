@@ -42,13 +42,13 @@ nav button {
 
 #mapContainer {
     display: flex;
-    flex-direction: row; /* This keeps the order but aligns them left-to-right */
+    flex-direction: row; 
 }
 
 #map {
     width: 100%;
-    height: calc(100vh - 200px);  /* Responsive height */
-    background-color: #f0f0f0;     /* Light background for map area */
+    height: calc(100vh - 200px); 
+    background-color: #f0f0f0;    
 }
 
 
